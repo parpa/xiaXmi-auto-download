@@ -27,6 +27,10 @@ $get_song_info = function () use($curl_download)
     }
     return $curl_download("http://api.xiami.com/app/android/song?id={$songId}");
 };
+$get_file_name = function ($response)
+{
+    return $response->song->song_id . str_replace('/', '-', $response->song->song_name);
+};
 if (isset($_GET['debug'])) {
     $action = 'download';
     $_POST['songId'] = '1770221910';
@@ -40,7 +44,7 @@ switch ($action) {
             if (empty($response->song->song_location)) {
                 break;
             }
-            $mp3file = "./mp3/{$response->song->song_id}.{$response->song->song_name}.mp3";
+            $mp3file = "./mp3/".$get_file_name($response).".mp3";
             if (file_exists($mp3file)) {
                 $response->song->hasDown = true;
             } else {
@@ -62,7 +66,7 @@ switch ($action) {
             break;
         }
         $imgFileExt = pathinfo($response->song->song_logo, PATHINFO_EXTENSION);
-        $mp3file = "./mp3/{$response->song->song_id}.{$response->song->song_name}.mp3";
+        $mp3file = "./mp3/".$get_file_name($response).".mp3";
         
         if (!file_exists($mp3file)) {
             // 先下文件
@@ -147,7 +151,7 @@ switch ($action) {
         // add
         $id3->write($mp3file);
         // 移除图片
-        $imgFile = "./mp3/{$response->song->song_id}.{$response->song->song_name}.{$imgFileExt}";
+        $imgFile = "./mp3/".$get_file_name($response).".{$imgFileExt}";
         if (file_exists($imgFile)) {
             unlink($imgFile);
         }
