@@ -10,6 +10,7 @@ $(function () {
         if (result) {
             songId = parseInt(result[0]);
         }
+        songId = songId ? songId : parseInt($('#songId').val().trim());
         if (songId<1) {
             return;
         }
