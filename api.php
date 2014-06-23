@@ -29,7 +29,7 @@ $get_song_info = function () use($curl_download)
 };
 $get_file_name = function ($response)
 {
-    return $response->song->song_id . str_replace('/', '-', $response->song->song_name);
+    return $response->song->song_id. '.' . str_replace('/', '-', $response->song->song_name);
 };
 if (isset($_GET['debug'])) {
     $action = 'download';
