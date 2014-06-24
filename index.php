@@ -1,4 +1,5 @@
 <meta name="charset" content="utf-8">
+<meta charset="utf-8">
 <script type="text/javascript" src="jquery.min.js"></script>
 <script type="text/javascript">
 $(function () {
@@ -12,8 +13,10 @@ $(function () {
         }
         songId = songId ? songId : parseInt($('#songId').val().trim());
         if (songId<1) {
+            alert('error id');
             return;
         }
+        $('#main').hide();
         $.ajax({
           url: 'api.php',
           type: 'POST',
@@ -56,6 +59,7 @@ $(function () {
         
     });
     $('#download').click(function () {
+        $('#api').prop('disabled', true);
         $('#download').prop('disabled', true);
         $.ajax({
           url: 'api.php',
@@ -65,6 +69,7 @@ $(function () {
           complete: function(xhr, textStatus) {
             //called when complete
             $('#download').prop('disabled', false);
+            $('#api').prop('disabled', false);
           },
           success: function(data, textStatus, xhr) {
             //called when successful

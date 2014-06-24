@@ -1,5 +1,5 @@
 <?php
-$action = isset($_POST['action']) ?$_POST['action'] : '';
+$action = 'deal';
 $curl_download = function ($url) {
     // create a new cURL resource
     $ch = curl_init();
@@ -18,51 +18,24 @@ $curl_download = function ($url) {
     curl_close($ch);
     return $response;
 };
-$get_song_info = function () use($curl_download)
-{
-    $songId = $_POST['songId'];
-    $songId = intval($songId);
-    if ($songId < 1) {
-        return '';
-    }
-    return $curl_download("http://api.xiami.com/app/android/song?id={$songId}");
-};
 $get_file_name = function ($response)
 {
-    return dirname(__FILE__). '/mp3/'. $response->song->song_id. '.' . str_replace('/', '-', $response->song->song_name);
+    return dirname(__FILE__). '/mp3/'.$response->song->song_id. '.' . str_replace('/', '-', $response->song->song_name);
 };
-if (isset($_GET['debug'])) {
-    $action = 'download';
-    $_POST['songId'] = '1770221910';
-}
 header('Content-Type: application/json');
 switch ($action) {
-    case 'api': {
-        $response = $get_song_info();
-        if ($response) {
-            $response = json_decode($response);
-            if (empty($response->song->song_location)) {
-                echo json_encode($response);
-                break;
-            }
-            $mp3file = $get_file_name($response).".mp3";
-            if (file_exists($mp3file)) {
-                $response->song->hasDown = true;
-            } else {
-                $response->song->hasDown = false;
-            }
-            $response = json_encode($response);
-        }
-        header('Content-Type: application/json');
-        echo $response;
-        break;
-    }
-    case 'download': {
-        $response = $get_song_info();
+    case 'deal': {
+        $response = new stdClass();
+        $response->song = new stdClass();
+        $response->song->song_logo = 'http://img.xiami.net/images/album/img0/62500/16995305391399530539_2.jpg';
+        $response->song->song_location = 'http://ws.stream.qqmusic.qq.com/31814177.mp3?vkey=62291AA56BD59A198D5990EFFA63DE83B9C4F503080CF7292AF1A64A8AA5C486&fromtag=52&guid=CD61C6A4AEC6E7D94268331AA31E2ECC';
+        $response->song->song_id = '31814177';
+        $response->song->song_name = 'オベリスク';
+        $response->song->artist_name = 'May´n';
+        $response->song->album_name = '3DS用ソフトスーパーロボット大戦UX OST';
         if (!$response) {
             break;
         }
-        $response = json_decode($response);
         if (empty($response->song->song_location)) {
             break;
         }
