@@ -16,7 +16,7 @@ $(function () {
             alert('error id');
             return;
         }
-        $('#songImg').attr('src', "./load.jpg");
+        $('#songImg').attr('src', "./load.png");
         $('#main').hide();
         $.ajax({
           url: 'api.php',
