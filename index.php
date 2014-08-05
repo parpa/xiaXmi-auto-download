@@ -16,6 +16,7 @@ $(function () {
             alert('error id');
             return;
         }
+        $('#songImg').attr('src', "./load.jpg");
         $('#main').hide();
         $.ajax({
           url: 'api.php',
@@ -88,13 +89,13 @@ $(function () {
     <div style="margin:100px auto;width:400px;text-align:center;">
         
     
-    <form id="downloadForm" onsubmit="$('#api').click();return false;" method="get" accept-charset="utf-8">
+    <form id="downloadForm" onsubmit="if(!$('#api').prop('disabled')){$('#api').click();}return false;" method="get" accept-charset="utf-8">
         <label for="songId">songId </label><input type="text" name="songId" value="" id="songId">    
 
         <input id="api" type="button" value="getinfo &rarr;">
     </form>
     <div id="main" style="text-align:center;">
-        <img id="songImg" src="" />
+        <img id="songImg" src="" style="width:185px;height:185px;" />
         <br>
         <span id="songTitle" ></span>
         <br>
