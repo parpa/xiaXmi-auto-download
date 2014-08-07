@@ -25,14 +25,14 @@ $get_song_info = function () use($curl_download)
     if ($songId < 1) {
         return '';
     }
-    return $curl_download("http://api.xiami.com/app/android/song?id={$songId}");
+    return $curl_download("http://www.xiami.com/app/android/song?id={$songId}");
 };
 $get_file_name = function ($response)
 {
     return dirname(__FILE__). '/mp3/'. $response->song->song_id. '.' . str_replace('/', '-', $response->song->song_name);
 };
 if (isset($_GET['debug'])) {
-    $action = 'download';
+    $action = 'api';
     $_POST['songId'] = '1770221910';
 }
 header('Content-Type: application/json');
