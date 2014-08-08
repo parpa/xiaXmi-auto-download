@@ -1,6 +1,15 @@
 <?php
 $action = isset($_POST['action']) ?$_POST['action'] : '';
-$curl_download = function ($url) {
+$rand_agent = function ()
+{
+    $agents = ["Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/537.75.14","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_0) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0 Safari/537.75.14","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/6.1 Safari/537.75.14","Mozilla/5.0 (iPhone; CPU iPhone OS 7_0 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11A465 Safari/9537.53","Mozilla/5.0 (iPod; CPU iPhone OS 7_0 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11A465 Safari/9537.53","Mozilla/5.0 (iPad; CPU OS 7_0 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11A465 Safari/9537.53","Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Win64; x64; Trident/6.0)","Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)","Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)","Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36","Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36","Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:23.0) Gecko/20100101 Firefox/23.0","Mozilla/5.0 (Windows NT 6.2; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0"];
+    return $agents[array_rand($agents)];
+};
+$rand_ip = function ()
+{
+    return '123.125.'. rand(1,254). '.'.  rand(2,250);
+};
+$curl_download = function ($url) use($rand_agent, $rand_ip) {
     // create a new cURL resource
     $ch = curl_init();
 
@@ -10,6 +19,14 @@ $curl_download = function ($url) {
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
     curl_setopt($ch, CURLOPT_HEADER, 0);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    // CURLOPT_HTTPHEADER
+    $ip = $rand_ip();
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'User-Agent: ' . $rand_agent(),
+        'X-Forwarded-For: ' . $ip,
+        'Client-IP: ' . $ip,
+    ));
+    
     // time out 
     curl_setopt($ch,CURLOPT_TIMEOUT,1200);
 
