@@ -105,13 +105,17 @@ switch ($action) {
             }
             $response = json_encode($response);
         }
-        header('Content-Type: application/json');
         echo $response;
         break;
     }
     case 'download': {
         $response = $get_song_info();
         if (!$response) {
+            // out
+            $output = [];
+            $output['status'] = 0;
+            $output['song_id'] = $_POST['songId'];
+            echo json_encode($output);
             break;
         }
         $imgFileExt = pathinfo($response->album_pic, PATHINFO_EXTENSION);
