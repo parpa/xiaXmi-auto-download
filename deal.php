@@ -23,11 +23,11 @@ $redownload = function ($id)
     // close cURL resource, and free up system resources
     curl_close($ch);
     echo $response;
-}
+};
 $dir = dirname(__FILE__). '/mp3/';
 $d = dir($dir);
 $songIds = [];
-while ($entry = $d->read()) {
+while (false !== ($entry = $d->read())) {
      if ($entry{0} === '.') {
         continue;
     }
@@ -35,9 +35,33 @@ while ($entry = $d->read()) {
     if (empty($match) or empty($match[0])) {
         continue;
     }
-    $songIds[] = $match[0];
+    $songIds[$match[0]] = $match[0];
 }
 $d->close();
 foreach ($songIds as $id) {
     $redownload($id);
 }
+// 移除冗余文件
+$dir = dirname(__FILE__). '/mp3/';
+$d = dir($dir);
+$songIds = [];
+while (false !== ($entry = $d->read())) {
+     if ($entry{0} === '.') {
+        continue;
+    }
+    preg_match("/^\d+/", $entry, $match);
+    if (empty($match) or empty($match[0])) {
+        continue;
+    }
+    if (isset($songIds[$match[0]])) {
+        $f1 = $dir. $songIds[$match[0]];
+        $f2 = $dir. $entry;
+        if (filemtime($f1) > filemtime($f2)) {
+            unlink($f2);
+        } else {
+            unlink($f1);
+        }
+    }
+    $songIds[$match[0]] = $entry;
+}
+$d->close();
