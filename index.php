@@ -7,7 +7,7 @@ $(function () {
     var downinfo = {img:'',mp3:'',name:'', songId:0, hasDown:false};
     $('#api').click(function () {
         var songId = 0;
-        var result = $('#songId').val().trim().match(/\d+$/);
+        var result = $('#songId').val().trim().replace(/\?.*?$/, '').match(/\d+$/);
         if (result) {
             songId = parseInt(result[0]);
         }
