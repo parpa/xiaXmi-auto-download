@@ -208,7 +208,6 @@ switch ($action) {
         $output = [];
         $output['status'] = 1;
         $output['song_id'] = $response->song_id;
-        $output['title'] = $response->title;
         echo json_encode($output);
         break;
     }
