@@ -10,6 +10,8 @@ $curl_download = function ($url) {
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
     curl_setopt($ch, CURLOPT_HEADER, 0);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    // time out 
+    curl_setopt($ch,CURLOPT_TIMEOUT,1200);
 
     // grab URL and pass it to the browser
     $response = curl_exec($ch);
