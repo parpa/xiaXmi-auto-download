@@ -27,18 +27,18 @@ $(function () {
             //called when complete
           },
           success: function(data, textStatus, xhr) {
-              if (data && data.song) {
-                  data = data.song;
+              if (data && data.song_id) {
+                  // do not
               } else {
                   alert('error');
                   return;
               }
             //called when successful
             downinfo.songId = data.song_id;
-            downinfo.img=data.song_logo;
-            downinfo.mp3=data.song_location;
-            downinfo.name=data.song_name;
-            downinfo.hasDown=data.hasDown;
+            downinfo.img=data.album_pic;
+            downinfo.mp3=data.location;
+            downinfo.name=data.title;
+            downinfo.hasDown=!!parseInt(data.hasDown);
             
             $('#songId').val(data.song_id);
             

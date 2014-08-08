@@ -18,18 +18,67 @@ $curl_download = function ($url) {
     curl_close($ch);
     return $response;
 };
-$get_song_info = function () use($curl_download)
+$DecryptionLocation = function ($a)
+{
+    preg_match('/^\d+/', $a, $match);
+    if (empty($match)) {
+        return '';
+    }
+    $d = $match[0];
+    $a = substr($a, strlen($d));
+    $d = intval($d);
+    if ($d < 1) {
+        return '';
+    }
+    $len = ceil(strlen($a)/$d);
+    $len2 = $len * (strlen($a)%$d) + 1;
+    $tmp = [];
+    for ($j=0,$i=0; $i < strlen($a); $i++,$j++) {
+        if (!isset($tmp[$j])) {
+            $tmp[$j] = '';
+        }
+        if ($i == $len2) {
+            $len -=1;
+        }
+        if ($j == $len) {
+            $j = 0;
+        }
+        $tmp[$j] .= $a{$i};
+    }
+    $output = join('', $tmp);
+    $output = urldecode($output);
+    $output = str_replace('^', '0', $output);
+    return $output;
+};
+$get_song_info = function () use($curl_download, $DecryptionLocation)
 {
     $songId = $_POST['songId'];
     $songId = intval($songId);
     if ($songId < 1) {
         return '';
     }
-    return $curl_download("http://www.xiami.com/app/android/song?id={$songId}");
+    $response = $curl_download("http://www.xiami.com/song/playlist/id/{$songId}");
+    if (!$response) {
+        return null;
+    }
+    $response = preg_replace("/<\!\[CDATA\[(.*?)\]\]>/s", "$1", $response);
+    $response = simplexml_load_string($response);
+    if (!$response or empty($response->trackList->track)) {
+        return null;
+        break;
+    }
+    $response = $response->trackList->track;
+    if (empty($response->location)) {
+        return null;
+        break;
+    }
+    // 解密location
+    $response->location = $DecryptionLocation($response->location);
+    return $response;
 };
 $get_file_name = function ($response)
 {
-    return dirname(__FILE__). '/mp3/'. $response->song->song_id. '.' . str_replace('/', '-', $response->song->song_name);
+    return dirname(__FILE__). '/mp3-t/'. $response->song_id. '.' . str_replace('/', '-', $response->title);
 };
 if (isset($_GET['debug'])) {
     $action = 'api';
@@ -40,16 +89,11 @@ switch ($action) {
     case 'api': {
         $response = $get_song_info();
         if ($response) {
-            $response = json_decode($response);
-            if (empty($response->song->song_location)) {
-                echo json_encode($response);
-                break;
-            }
             $mp3file = $get_file_name($response).".mp3";
             if (file_exists($mp3file)) {
-                $response->song->hasDown = true;
+                $response->hasDown = 1;
             } else {
-                $response->song->hasDown = false;
+                $response->hasDown = 0;
             }
             $response = json_encode($response);
         }
@@ -62,16 +106,12 @@ switch ($action) {
         if (!$response) {
             break;
         }
-        $response = json_decode($response);
-        if (empty($response->song->song_location)) {
-            break;
-        }
-        $imgFileExt = pathinfo($response->song->song_logo, PATHINFO_EXTENSION);
+        $imgFileExt = pathinfo($response->album_pic, PATHINFO_EXTENSION);
         $mp3file = $get_file_name($response).".mp3";
         
         if (!file_exists($mp3file)) {
             // 先下文件
-            $mp3data = $curl_download($response->song->song_location);
+            $mp3data = $curl_download($response->location);
             file_put_contents($mp3file, $mp3data);
         }
         // 处理文件，亲
@@ -81,16 +121,16 @@ switch ($action) {
           "status": "ok",
           "song": {
             "song_id": "3341658",
-            "song_name": "\u7f8e\u3057\u304d\u3082\u306e",
-            "song_location": "http:\/\/m5.file.xiami.com\/976\/54976\/301986\/3341658_10853734_l.mp3?auth_key=2b681780455fee58d0f2a0652b61354f-1403568000-0-null",
+            "title": "\u7f8e\u3057\u304d\u3082\u306e",
+            "location": "http:\/\/m5.file.xiami.com\/976\/54976\/301986\/3341658_10853734_l.mp3?auth_key=2b681780455fee58d0f2a0652b61354f-1403568000-0-null",
             "song_lrc": "http:\/\/img.xiami.net\/lyric\/58\/3341658_13995474539483.lrc",
-            "song_logo": "http:\/\/img.xiami.net\/images\/album\/img76\/54976\/3019861370588827_2.jpg",
+            "album_pic": "http:\/\/img.xiami.net\/images\/album\/img76\/54976\/3019861370588827_2.jpg",
             "song_level": "-1",
             "album_id": "301986",
             "album_name": "Roman",
-            "album_logo": "http:\/\/img.xiami.net\/images\/album\/img76\/54976\/3019861370588827_2.jpg",
+            "album_pic": "http:\/\/img.xiami.net\/images\/album\/img76\/54976\/3019861370588827_2.jpg",
             "artist_id": "54976",
-            "artist_name": "Sound Horizon",
+            "artist": "Sound Horizon",
             "artist_logo": "http:\/\/img.xiami.net\/images\/artistlogo\/88\/13542539337988_1.jpg",
             "hasDown": true
           }
@@ -111,31 +151,31 @@ switch ($action) {
         $id3 = new Zend_Media_Id3v2();
         // tit2
         $tit2 = new Zend_Media_Id3_Frame_Tit2();
-        $tit2->setText($response->song->song_name);
+        $tit2->setText($response->title);
         $id3->addFrame($tit2);
         // talb
         $talb = new Zend_Media_Id3_Frame_Talb();
-        $talb->setText($response->song->album_name);
+        $talb->setText($response->album_name);
         $id3->addFrame($talb);
         // tcmp
         $tcmp = new Zend_Media_Id3_Frame_Tcmp();
-        $tcmp->setText($response->song->artist_name);
+        $tcmp->setText($response->artist);
         $id3->addFrame($tcmp);
         // Tso2
         $tso2 = new Zend_Media_Id3_Frame_Tso2();
-        $tso2->setText($response->song->artist_name);
+        $tso2->setText($response->artist);
         $id3->addFrame($tso2);
         // Tmcl
         $tmcl = new Zend_Media_Id3_Frame_Tmcl();
-        $tmcl->setText($response->song->artist_name);
+        $tmcl->setText($response->artist);
         $id3->addFrame($tmcl);
         // Tope
         $tope = new Zend_Media_Id3_Frame_Tope();
-        $tope->setText($response->song->artist_name);
+        $tope->setText($response->artist);
         $id3->addFrame($tope);
         // Tpe1
         $tpe1 = new Zend_Media_Id3_Frame_Tpe1();
-        $tpe1->setText($response->song->artist_name);
+        $tpe1->setText($response->artist);
         $id3->addFrame($tpe1);
         // pic
         $apic = new Zend_Media_Id3_Frame_Apic();
@@ -145,7 +185,7 @@ switch ($action) {
             $apic->setMimeType('image/'. $imgFileExt);
         }
         // 远程获取图片
-        $imgdata = $curl_download($response->song->song_logo);
+        $imgdata = $curl_download($response->album_pic);
         $apic->setImageData($imgdata); 
         $apic->setImageType(3); 
         $id3->addFrame($apic); 
