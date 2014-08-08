@@ -72,6 +72,9 @@ $DecryptionLocation = function ($a)
     $output = join('', $tmp);
     $output = urldecode($output);
     $output = str_replace('^', '0', $output);
+    if (!preg_match('/\.file\.xiami\.com/', $output)) {
+        $output = '';
+    }
     return $output;
 };
 $get_song_info = function () use($curl_download, $DecryptionLocation)
@@ -89,12 +92,10 @@ $get_song_info = function () use($curl_download, $DecryptionLocation)
     $response = simplexml_load_string($response);
     if (!$response or empty($response->trackList->track)) {
         return null;
-        break;
     }
     $response = $response->trackList->track;
     if (empty($response->location)) {
         return null;
-        break;
     }
     $response->song_id = trim($response->song_id);
     $response->location = trim($response->location);
@@ -104,6 +105,9 @@ $get_song_info = function () use($curl_download, $DecryptionLocation)
     $response->album_pic = trim($response->album_pic);
     // 解密location
     $response->location = $DecryptionLocation($response->location);
+    if (empty($response->location)) {
+        return null;
+    }
     return $response;
 };
 $get_file_name = function ($response)
