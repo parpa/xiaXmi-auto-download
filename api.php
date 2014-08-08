@@ -78,7 +78,7 @@ $get_song_info = function () use($curl_download, $DecryptionLocation)
 };
 $get_file_name = function ($response)
 {
-    return dirname(__FILE__). '/mp3-t/'. $response->song_id. '.' . str_replace('/', '-', $response->title);
+    return dirname(__FILE__). '/mp3/'. $response->song_id. '.' . str_replace('/', '-', $response->title);
 };
 if (isset($_GET['debug'])) {
     $action = 'api';
