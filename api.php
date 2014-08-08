@@ -74,6 +74,12 @@ $get_song_info = function () use($curl_download, $DecryptionLocation)
         return null;
         break;
     }
+    $response->song_id = trim($response->song_id);
+    $response->location = trim($response->location);
+    $response->title = trim($response->title);
+    $response->album_name = trim($response->album_name);
+    $response->artist = trim($response->artist);
+    $response->album_pic = trim($response->album_pic);
     // 解密location
     $response->location = $DecryptionLocation($response->location);
     return $response;
@@ -199,7 +205,11 @@ switch ($action) {
             unlink($imgFile);
         }
         // out
-        echo '{"status":"1"}';
+        $output = [];
+        $output['status'] = 1;
+        $output['song_id'] = $response->song_id;
+        $output['title'] = $response->title;
+        echo json_encode($output);
         break;
     }
     default:
