@@ -51,18 +51,23 @@ $DecryptionLocation = function ($a)
     }
     $len = ceil(strlen($a)/$d);
     $len2 = $len * (strlen($a)%$d) + 1;
+    // echo $len ;
+    // echo "\n";
+    // echo $len2;
     $tmp = [];
     for ($j=0,$i=0; $i < strlen($a); $i++,$j++) {
         if (!isset($tmp[$j])) {
             $tmp[$j] = '';
         }
-        if ($i == $len2) {
+        if ($len2 > 1 && $i == $len2) {
             $len -=1;
         }
         if ($j == $len) {
             $j = 0;
+            // echo "\n";
         }
         $tmp[$j] .= $a{$i};
+        // echo $a{$i};
     }
     $output = join('', $tmp);
     $output = urldecode($output);
@@ -139,7 +144,6 @@ switch ($action) {
         }
         $imgFileExt = pathinfo($response->album_pic, PATHINFO_EXTENSION);
         $mp3file = $get_file_name($response).".mp3";
-        
         if (!file_exists($mp3file)) {
             // 先下文件
             $mp3data = $curl_download($response->location);
