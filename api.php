@@ -104,6 +104,8 @@ switch ($action) {
                 $response->hasDown = 0;
             }
             $response = json_encode($response);
+        } else {
+            $response = json_encode(['status' => 0]);
         }
         echo $response;
         break;
