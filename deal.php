@@ -22,7 +22,8 @@ $redownload = function ($id)
 
     // close cURL resource, and free up system resources
     curl_close($ch);
-    echo $response;
+    echo $response. "\n";
+    ob_flush();
 };
 $dir = dirname(__FILE__). '/mp3/';
 $d = dir($dir);
@@ -38,7 +39,9 @@ while (false !== ($entry = $d->read())) {
     $songIds[$match[0]] = $match[0];
 }
 $d->close();
+ob_start();
 foreach ($songIds as $id) {
+    usleep(1000);
     $redownload($id);
 }
 // 移除冗余文件
@@ -60,8 +63,8 @@ while (false !== ($entry = $d->read())) {
             unlink($f2);
         } else {
             unlink($f1);
+            $songIds[$match[0]] = $entry;
         }
     }
-    $songIds[$match[0]] = $entry;
 }
 $d->close();
