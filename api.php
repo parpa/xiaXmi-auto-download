@@ -26,8 +26,8 @@ $curl_download = function ($url) use($rand_agent, $rand_ip) {
         'X-Forwarded-For: ' . $ip,
         'Client-IP: ' . $ip,
     ));
-    
-    // time out 
+
+    // time out
     curl_setopt($ch,CURLOPT_TIMEOUT,1200);
 
     // grab URL and pass it to the browser
@@ -72,7 +72,7 @@ $DecryptionLocation = function ($a)
     $output = join('', $tmp);
     $output = urldecode($output);
     $output = str_replace('^', '0', $output);
-    if (!preg_match('/\.file\.xiami\.com/', $output)) {
+    if (!preg_match('/https?:\/\//', $output)) {
         $output = '';
     }
     return $output;
@@ -103,6 +103,7 @@ $get_song_info = function () use($curl_download, $DecryptionLocation)
     $response->album_name = trim($response->album_name);
     $response->artist = trim($response->artist);
     $response->album_pic = trim($response->album_pic);
+
     // 解密location
     $response->location = $DecryptionLocation($response->location);
     if (empty($response->location)) {
@@ -225,9 +226,9 @@ switch ($action) {
         }
         // 远程获取图片
         $imgdata = $curl_download($response->album_pic);
-        $apic->setImageData($imgdata); 
-        $apic->setImageType(3); 
-        $id3->addFrame($apic); 
+        $apic->setImageData($imgdata);
+        $apic->setImageType(3);
+        $id3->addFrame($apic);
         // add
         $id3->write($mp3file);
         // 移除图片
