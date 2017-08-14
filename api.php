@@ -88,7 +88,7 @@ $get_song_info = function () use($curl_download, $DecryptionLocation)
     if (!$response) {
         return null;
     }
-    $response = preg_replace("/<\!\[CDATA\[(.*?)\]\]>/s", "$1", $response);
+    // $response = preg_replace("/<\!\[CDATA\[(.*?)\]\]>/s", "$1", $response);
     $response = simplexml_load_string($response);
     if (!$response or empty($response->trackList->track)) {
         return null;
